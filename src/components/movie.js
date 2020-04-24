@@ -1,13 +1,30 @@
 import React, { Component }  from 'react';
 import {connect} from "react-redux";
-import { Glyphicon, Panel, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { Glyphicon, Panel, ListGroup, ListGroupItem, Col, Form, FormGroup, FormControl, ControlLabel, Button  } from 'react-bootstrap'
 import { Image } from 'react-bootstrap'
 import { withRouter } from "react-router-dom";
 import {fetchMovie} from "../actions/movieActions";
+import {submitForm} from "../actions/movieActions";
 
 //support routing by creating a new component
 
 class Movie extends Component {
+
+    constructor(props){
+        super(props);
+
+        this.updateDetails = this.updateDetails.bind(this);
+        this.submit = this.submit.bind(this);
+        this.state = {
+            details:{
+                movieId : '',
+                username: '',
+                quote: '',
+                rating: ''
+            }
+        };
+        this.state.details.username= super.state.auth.username;
+    }
 
     componentDidMount() {
         const {dispatch} = this.props;
@@ -15,6 +32,25 @@ class Movie extends Component {
             dispatch(fetchMovie(this.props.movieId));
         }
     }
+
+    //******************** REVIEW FORM CODE *****************************
+
+    updateDetails(event) {
+        let updateDetails = Object.assign({}, this.state.details);
+
+        updateDetails[event.target.id] = event.target.value;
+        this.setState({
+            details: updateDetails
+        });
+    }
+
+
+    submit(){
+        const {dispatch} = this.props;
+        dispatch(submitForm(this.state.details));
+    }
+
+    //*******************************************************************
 
     render() {
         const ActorInfo = ({actors}) => {
@@ -28,11 +64,46 @@ class Movie extends Component {
         const ReviewInfo = ({reviews}) => {
             return reviews.map((review, i) =>
                 <p key={i}>
-                    <b>{review.username}</b> {review.review}
+                    <b>{review.username}</b> {review.quote}
                     <Glyphicon glyph={'star'} /> {review.rating}
                 </p>
             )
         }
+
+        const ReviewForm = ({movieId}) => {
+            this.state.details.movieId = movieId;
+            return (
+                <Form horizontal>
+
+                    <FormGroup controlId="quote">
+                        <Col componentClass={ControlLabel} sm={2}>
+                            Review
+                        </Col>
+                        <Col sm={10}>
+                            <FormControl onChange={this.updateDetails} value={this.state.details.username} type="text" placeholder="Review" />
+                        </Col>
+                    </FormGroup>
+
+                    <FormGroup controlId="rating">
+                        <Col componentClass={ControlLabel} sm={2}>
+                            Rating
+                        </Col>
+                        <Col sm={10}>
+                            <FormControl onChange={this.updateDetails} value={this.state.details.password} type="password" placeholder="Rating 1-5" />
+                        </Col>
+                    </FormGroup>
+
+                    <FormGroup>
+                        <Col smOffset={2} sm={10}>
+                            <Button onClick={this.submitForm}>Submit Review</Button>
+                        </Col>
+                    </FormGroup>
+                </Form>
+            )
+        }
+
+
+        //********************************************************************
 
         const DetailInfo = ({currentMovie}) => {
             if (!currentMovie) { //if not could still be fetching the movie
@@ -48,6 +119,7 @@ class Movie extends Component {
                       <ListGroupItem><h4><Glyphicon glyph={'star'}/> {currentMovie.avgRating} </h4></ListGroupItem>
                   </ListGroup>
                   <Panel.Body><ReviewInfo reviews={currentMovie.reviews} /></Panel.Body>
+                  <Panel.Body><ReviewForm movieId={currentMovie.id}/></Panel.Body>
               </Panel>
             );
         }
