@@ -5,6 +5,7 @@ import { Image } from 'react-bootstrap'
 import { withRouter } from "react-router-dom";
 import {fetchMovie} from "../actions/movieActions";
 import {submitForm} from "../actions/movieActions";
+import runtimeEnv from '@mars/heroku-js-runtime-env';
 
 //support routing by creating a new component
 
@@ -17,13 +18,10 @@ class Movie extends Component {
         this.submit = this.submit.bind(this);
         this.state = {
             details:{
-                movieId : '',
-                username: '',
                 quote: '',
                 rating: ''
             }
         };
-        this.state.details.username= super.state.auth.username;
     }
 
     componentDidMount() {
@@ -31,11 +29,12 @@ class Movie extends Component {
         if (this.props.selectedMovie == null) {
             dispatch(fetchMovie(this.props.movieId));
         }
+
     }
 
     //******************** REVIEW FORM CODE *****************************
 
-    updateDetails(event) {
+    updateDetails(event){
         let updateDetails = Object.assign({}, this.state.details);
 
         updateDetails[event.target.id] = event.target.value;
@@ -44,10 +43,17 @@ class Movie extends Component {
         });
     }
 
-
     submit(){
         const {dispatch} = this.props;
-        dispatch(submitForm(this.state.details));
+        let details = {
+
+            movieId : this.props.match.params.movieId,
+            quote: this.state.details.quote,
+            rating: this.state.details.rating
+
+        };
+
+        dispatch(submitForm(details, this.props.selectedMovie));
     }
 
     //*******************************************************************
@@ -70,45 +76,16 @@ class Movie extends Component {
             )
         }
 
-        const ReviewForm = ({movieId}) => {
-            this.state.details.movieId = movieId;
-            return (
-                <Form horizontal>
-
-                    <FormGroup controlId="quote">
-                        <Col componentClass={ControlLabel} sm={2}>
-                            Review
-                        </Col>
-                        <Col sm={10}>
-                            <FormControl onChange={this.updateDetails} value={this.state.details.username} type="text" placeholder="Review" />
-                        </Col>
-                    </FormGroup>
-
-                    <FormGroup controlId="rating">
-                        <Col componentClass={ControlLabel} sm={2}>
-                            Rating
-                        </Col>
-                        <Col sm={10}>
-                            <FormControl onChange={this.updateDetails} value={this.state.details.password} type="password" placeholder="Rating 1-5" />
-                        </Col>
-                    </FormGroup>
-
-                    <FormGroup>
-                        <Col smOffset={2} sm={10}>
-                            <Button onClick={this.submitForm}>Submit Review</Button>
-                        </Col>
-                    </FormGroup>
-                </Form>
-            )
-        }
 
 
         //********************************************************************
 
         const DetailInfo = ({currentMovie}) => {
+
             if (!currentMovie) { //if not could still be fetching the movie
                 return <div>Loading...</div>;
             }
+
             return (
               <Panel>
                   <Panel.Heading>Movie Detail</Panel.Heading>
@@ -119,14 +96,46 @@ class Movie extends Component {
                       <ListGroupItem><h4><Glyphicon glyph={'star'}/> {currentMovie.avgRating} </h4></ListGroupItem>
                   </ListGroup>
                   <Panel.Body><ReviewInfo reviews={currentMovie.reviews} /></Panel.Body>
-                  <Panel.Body><ReviewForm movieId={currentMovie.id}/></Panel.Body>
+
               </Panel>
             );
         }
 
+        // return (
+        //
+        //     <DetailInfo currentMovie={this.props.selectedMovie} />
+        //
+        // )
+
         return (
-            <DetailInfo currentMovie={this.props.selectedMovie} />
-        )
+            <div>
+                <DetailInfo currentMovie={this.props.selectedMovie} />
+                <Form horizontal>
+                    <FormGroup controlId="quote">
+                        <Col componentClass={ControlLabel} sm={2}>
+                            Review
+                        </Col>
+                        <Col sm={10}>
+                            <FormControl onChange={this.updateDetails} value={this.state.details.quote} type="text" placeholder="small quote" />
+                        </Col>
+                    </FormGroup>
+                    <FormGroup controlId="rating">
+                        <Col componentClass={ControlLabel} sm={2}>
+                            Rating
+                        </Col>
+                        <Col sm={10}>
+                            <FormControl onChange={this.updateDetails} value={this.state.details.rating} type="number" min="1" max="5" />
+                        </Col>
+                    </FormGroup>
+                    <FormGroup>
+                        <Col smOffset={2} sm={10}>
+                            <Button onClick={this.submit}>Submit</Button>
+                        </Col>
+                    </FormGroup>
+                </Form>
+
+            </div>
+        );
     }
 }
 

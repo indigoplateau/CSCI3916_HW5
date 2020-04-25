@@ -1,6 +1,6 @@
 import actionTypes from '../constants/actionTypes';
 import runtimeEnv from '@mars/heroku-js-runtime-env';
-import {submitLogin} from "./authActions";
+
 
 function moviesFetched(movies) {
     return {
@@ -77,14 +77,15 @@ export function fetchMovie(movieId){
     }
 }
 
-export function submitForm(data){
+export function submitForm(data, movie){
     const env = runtimeEnv();
     return dispatch => {
         return fetch(`${env.REACT_APP_API_URL}/reviews`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify(data),
             mode: 'cors'})
@@ -96,7 +97,9 @@ export function submitForm(data){
             })
             .then( (res) => {
 
-                dispatch(submitLogin(data));
+                dispatch(setMovie(movie));
+                window.location.reload();
+
             })
             .catch( (e) => console.log(e) );
     }
