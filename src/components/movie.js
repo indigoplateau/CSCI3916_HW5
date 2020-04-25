@@ -5,7 +5,8 @@ import { Image } from 'react-bootstrap'
 import { withRouter } from "react-router-dom";
 import {fetchMovie} from "../actions/movieActions";
 import {submitForm} from "../actions/movieActions";
-import runtimeEnv from '@mars/heroku-js-runtime-env';
+
+
 
 //support routing by creating a new component
 
@@ -17,6 +18,7 @@ class Movie extends Component {
         this.updateDetails = this.updateDetails.bind(this);
         this.submit = this.submit.bind(this);
         this.state = {
+            currentMovie: '',
             details:{
                 quote: '',
                 rating: ''
@@ -30,6 +32,51 @@ class Movie extends Component {
             dispatch(fetchMovie(this.props.movieId));
         }
 
+        this.hydrateStateWithLocalStorage();
+        this.setState({currentMovie : this.props.selectedMovie });
+        window.addEventListener(
+            "beforeunload",
+            this.saveStateToLocalStorage.bind(this)
+        );
+
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener(
+            "beforeunload",
+            this.saveStateToLocalStorage.bind(this)
+        );
+
+        // saves if component has a chance to unmount
+        this.saveStateToLocalStorage();
+    }
+
+    hydrateStateWithLocalStorage() {
+        // for all items in state
+        for (let key in this.state) {
+            // if the key exists in localStorage
+            if (localStorage.hasOwnProperty(key)) {
+                // get the key's value from localStorage
+                let value = localStorage.getItem(key);
+
+                // parse the localStorage string and setState
+                try {
+                    value = JSON.parse(value);
+                    this.setState({ [key]: value });
+                } catch (e) {
+                    // handle empty string
+                    this.setState({ [key]: value });
+                }
+            }
+        }
+    }
+
+    saveStateToLocalStorage() {
+        // for every item in React state
+        for (let key in this.state) {
+            // save to localStorage
+            localStorage.setItem(key, JSON.stringify(this.state[key]));
+        }
     }
 
     //******************** REVIEW FORM CODE *****************************
@@ -59,6 +106,61 @@ class Movie extends Component {
     //*******************************************************************
 
     render() {
+        /*const ActorInfo = ({actors}) => {
+
+            if(!actors){
+
+                var stateactorsList = this.state.reviewsList;
+                return stateactorsList.map((actor, i) =>
+                    <p key={i}>
+                        <b>{actor.actorName}</b> {actor.characterName}
+                    </p>
+                )
+
+
+            }
+            else{
+                var actorsList = JSON.parse(JSON.stringify(actors));
+                this.setState(actorsList);
+                return actors.map((actor, i) =>
+                <p key={i}>
+                    <b>{actor.actorName}</b> {actor.characterName}
+                </p>
+            )
+
+            }
+
+
+        }
+
+        const ReviewInfo = ({reviews}) => {
+
+            if(!reviews){
+                var statereviewsList = this.state.reviewsList;
+
+                return statereviewsList.map((review, i) =>
+                    <p key={i}>
+                        <b>{review.username}</b> {review.quote}
+                        <Glyphicon glyph={'star'} /> {review.rating}
+                    </p>
+                )
+
+            }
+            else{
+                var reviewsList = JSON.parse(JSON.stringify(reviews));
+                this.setState(reviewsList);
+
+                return reviews.map((review, i) =>
+                    <p key={i}>
+                        <b>{review.username}</b> {review.quote}
+                        <Glyphicon glyph={'star'} /> {review.rating}
+                    </p>
+                )
+            }
+
+
+
+        }*/
         const ActorInfo = ({actors}) => {
             return actors.map((actor, i) =>
                 <p key={i}>
@@ -77,28 +179,38 @@ class Movie extends Component {
         }
 
 
-
         //********************************************************************
 
         const DetailInfo = ({currentMovie}) => {
 
             if (!currentMovie) { //if not could still be fetching the movie
-                return <div>Loading...</div>;
+                return <Panel>
+                    <Panel.Heading>Movie Detail</Panel.Heading>
+                    <Panel.Body><Image className="image" src={this.state.currentMovie.imageUrl} thumbnail /></Panel.Body>
+                    <ListGroup>
+                        <ListGroupItem>{this.state.currentMovie.title}</ListGroupItem>
+                        <ListGroupItem><ActorInfo actors={this.state.currentMovie.actors} /></ListGroupItem>
+                        <ListGroupItem><h4><Glyphicon glyph={'star'}/> {this.state.currentMovie.avgRating} </h4></ListGroupItem>
+                    </ListGroup>
+                    <Panel.Body><ReviewInfo reviews={this.state.currentMovie.reviews} /></Panel.Body>
+
+                </Panel>
             }
+            else{
+                return (
+                    <Panel>
+                        <Panel.Heading>Movie Detail</Panel.Heading>
+                        <Panel.Body><Image className="image" src={currentMovie.imageUrl} thumbnail /></Panel.Body>
+                        <ListGroup>
+                            <ListGroupItem>{currentMovie.title}</ListGroupItem>
+                            <ListGroupItem><ActorInfo actors={currentMovie.actors} /></ListGroupItem>
+                            <ListGroupItem><h4><Glyphicon glyph={'star'}/> {currentMovie.avgRating} </h4></ListGroupItem>
+                        </ListGroup>
+                        <Panel.Body><ReviewInfo reviews={currentMovie.reviews} /></Panel.Body>
 
-            return (
-              <Panel>
-                  <Panel.Heading>Movie Detail</Panel.Heading>
-                  <Panel.Body><Image className="image" src={currentMovie.imageUrl} thumbnail /></Panel.Body>
-                  <ListGroup>
-                      <ListGroupItem>{currentMovie.title}</ListGroupItem>
-                      <ListGroupItem><ActorInfo actors={currentMovie.actors} /></ListGroupItem>
-                      <ListGroupItem><h4><Glyphicon glyph={'star'}/> {currentMovie.avgRating} </h4></ListGroupItem>
-                  </ListGroup>
-                  <Panel.Body><ReviewInfo reviews={currentMovie.reviews} /></Panel.Body>
-
-              </Panel>
-            );
+                    </Panel>
+                );
+            }
         }
 
         // return (
