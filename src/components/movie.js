@@ -26,6 +26,9 @@ class Movie extends Component {
         };
     }
 
+    // trying to fix state issue with guidance of this how to:
+    // https://hackernoon.com/how-to-take-advantage-of-local-storage-in-your-react-projects-a895f2b2d3f2
+
     componentDidMount() {
         const {dispatch} = this.props;
         if (this.props.selectedMovie == null) {
@@ -33,7 +36,7 @@ class Movie extends Component {
         }
 
         this.hydrateStateWithLocalStorage();
-        this.setState({currentMovie : this.props.selectedMovie });
+        this.setState({currentMovie :JSON.stringify(this.props.selectedMovie)});
         window.addEventListener(
             "beforeunload",
             this.saveStateToLocalStorage.bind(this)
