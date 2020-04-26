@@ -97,8 +97,7 @@ export function submitForm(data, movie){
             })
             .then( (res) => {
 
-                dispatch(setMovie(movie));
-                window.location.reload();
+                dispatch(fetchMovie(data.movieId));
 
             })
             .catch( (e) => console.log(e) );
