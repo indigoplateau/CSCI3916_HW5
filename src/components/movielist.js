@@ -6,7 +6,7 @@ import { Image } from 'react-bootstrap'
 import { Carousel } from 'react-bootstrap'
 import { Glyphicon } from 'react-bootstrap'
 import {LinkContainer} from 'react-router-bootstrap';
-
+import noImage from '../images/noimage.gif'
 class MovieList extends Component {
     constructor(props) {
         super(props);
@@ -40,7 +40,7 @@ class MovieList extends Component {
                         <Carousel.Item key={movie._id}>
                             <div>
                                 <LinkContainer to={'/movie/'+movie._id} onClick={()=>this.handleClick(movie)}>
-                                    <Image className="image" src={movie.imageUrl} thumbnail />
+                                    <Image className="image" src={movie.imageUrl ? movie.imageUrl : noImage} thumbnail />
                                 </LinkContainer>
                             </div>
                             <Carousel.Caption>
