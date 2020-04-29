@@ -5,7 +5,7 @@ import { Image } from 'react-bootstrap'
 import { withRouter } from "react-router-dom";
 import {fetchMovie} from "../actions/movieActions";
 import {submitForm} from "../actions/movieActions";
-import runtimeEnv from '@mars/heroku-js-runtime-env';
+
 
 //support routing by creating a new component
 
@@ -101,11 +101,6 @@ class Movie extends Component {
             );
         }
 
-        // return (
-        //
-        //     <DetailInfo currentMovie={this.props.selectedMovie} />
-        //
-        // )
 
         return (
             <div>
