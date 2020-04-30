@@ -5,7 +5,7 @@ import { Image } from 'react-bootstrap'
 import { withRouter } from "react-router-dom";
 import {fetchMovie} from "../actions/movieActions";
 import {submitForm} from "../actions/movieActions";
-
+import noImage from '../images/noimage.gif'
 
 //support routing by creating a new component
 
@@ -89,7 +89,7 @@ class Movie extends Component {
             return (
               <Panel>
                   <Panel.Heading>Movie Detail</Panel.Heading>
-                  <Panel.Body><Image className="image" src={currentMovie.imageUrl} thumbnail /></Panel.Body>
+                  <Panel.Body><Image className="image" src={currentMovie.imageUrl ? currentMovie.imageUrl : noImage} thumbnail /></Panel.Body>
                   <ListGroup>
                       <ListGroupItem>{currentMovie.title}</ListGroupItem>
                       <ListGroupItem><ActorInfo actors={currentMovie.actors} /></ListGroupItem>
